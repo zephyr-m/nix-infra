@@ -42,12 +42,14 @@ After that, start the platform:
 ```bash
 cd ~/infra
 nix --extra-experimental-features nix-command --extra-experimental-features flakes develop
-just start-full
+just start
 ```
 
 Open:
 
 ```text
+https://home.127.0.0.1.sslip.io
+https://dozzle.127.0.0.1.sslip.io
 https://demo.127.0.0.1.sslip.io
 https://traefik.127.0.0.1.sslip.io
 ```
@@ -68,6 +70,22 @@ https://grafana.127.0.0.1.sslip.io
 ```
 
 Default credentials are in `.env`.
+
+## Platform Portal
+
+The portal is included in `just start`. To run only the portal services manually:
+
+```bash
+just portal-up
+just urls
+```
+
+Open:
+
+```text
+https://home.127.0.0.1.sslip.io
+https://dozzle.127.0.0.1.sslip.io
+```
 
 ## Adding An App
 

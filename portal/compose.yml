@@ -1,0 +1,49 @@
+name: local-portal
+
+services:
+  homepage:
+    image: ${HOMEPAGE_IMAGE}
+    container_name: infra-homepage
+    restart: unless-stopped
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: home.${BASE_DOMAIN},homepage.${BASE_DOMAIN},localhost,127.0.0.1
+    volumes:
+      - ./portal/homepage:/app/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.homepage.rule=Host(`home.${BASE_DOMAIN}`)
+      - traefik.http.routers.homepage.entrypoints=web
+      - traefik.http.services.homepage.loadbalancer.server.port=3000
+      - traefik.http.routers.homepage-secure.rule=Host(`home.${BASE_DOMAIN}`)
+      - traefik.http.routers.homepage-secure.entrypoints=websecure
+      - traefik.http.routers.homepage-secure.tls=true
+      - traefik.http.routers.homepage-secure.service=homepage
+
+  dozzle:
+    image: ${DOZZLE_IMAGE}
+    container_name: infra-dozzle
+    restart: unless-stopped
+    environment:
+      DOZZLE_NO_ANALYTICS: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.dozzle.rule=Host(`dozzle.${BASE_DOMAIN}`)
+      - traefik.http.routers.dozzle.entrypoints=web
+      - traefik.http.services.dozzle.loadbalancer.server.port=8080
+      - traefik.http.routers.dozzle-secure.rule=Host(`dozzle.${BASE_DOMAIN}`)
+      - traefik.http.routers.dozzle-secure.entrypoints=websecure
+      - traefik.http.routers.dozzle-secure.tls=true
+      - traefik.http.routers.dozzle-secure.service=dozzle
+
+networks:
+  edge:
+    external: true

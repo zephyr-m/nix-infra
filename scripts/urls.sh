@@ -12,6 +12,8 @@ BASE_DOMAIN="${BASE_DOMAIN:-127.0.0.1.sslip.io}"
 
 cat <<EOF
 Platform:
+  Home:       https://home.${BASE_DOMAIN}
+  Dozzle:     https://dozzle.${BASE_DOMAIN}
   Traefik:    https://traefik.${BASE_DOMAIN}
 
 Demo:

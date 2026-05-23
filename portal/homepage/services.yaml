@@ -1,0 +1,32 @@
+- Platform:
+    - Traefik:
+        href: https://traefik.127.0.0.1.sslip.io
+        description: Reverse proxy dashboard
+        icon: traefik.svg
+    - Dozzle:
+        href: https://dozzle.127.0.0.1.sslip.io
+        description: Container logs
+        icon: dozzle.svg
+    - Docker:
+        description: Local container runtime
+        icon: docker.svg
+
+- Observability:
+    - Grafana:
+        href: https://grafana.127.0.0.1.sslip.io
+        description: Metrics dashboards
+        icon: grafana.svg
+    - Prometheus:
+        href: https://prometheus.127.0.0.1.sslip.io
+        description: Metrics store
+        icon: prometheus.svg
+    - Loki:
+        href: https://loki.127.0.0.1.sslip.io
+        description: Log store
+        icon: loki.svg
+
+- Apps:
+    - Demo:
+        href: https://demo.127.0.0.1.sslip.io
+        description: Example app behind Traefik
+        icon: nodejs.svg
