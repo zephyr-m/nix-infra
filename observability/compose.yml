@@ -1,0 +1,113 @@
+name: local-observability
+
+services:
+  prometheus:
+    image: ${PROMETHEUS_IMAGE}
+    container_name: infra-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - edge
+      - observability
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.${BASE_DOMAIN}`)
+      - traefik.http.routers.prometheus.entrypoints=web
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.http.routers.prometheus-secure.rule=Host(`prometheus.${BASE_DOMAIN}`)
+      - traefik.http.routers.prometheus-secure.entrypoints=websecure
+      - traefik.http.routers.prometheus-secure.tls=true
+      - traefik.http.routers.prometheus-secure.service=prometheus
+
+  loki:
+    image: ${LOKI_IMAGE}
+    container_name: infra-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./observability/loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    networks:
+      - edge
+      - observability
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.loki.rule=Host(`loki.${BASE_DOMAIN}`)
+      - traefik.http.routers.loki.entrypoints=web
+      - traefik.http.services.loki.loadbalancer.server.port=3100
+      - traefik.http.routers.loki-secure.rule=Host(`loki.${BASE_DOMAIN}`)
+      - traefik.http.routers.loki-secure.entrypoints=websecure
+      - traefik.http.routers.loki-secure.tls=true
+      - traefik.http.routers.loki-secure.service=loki
+
+  grafana:
+    image: ${GRAFANA_IMAGE}
+    container_name: infra-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: https://grafana.${BASE_DOMAIN}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - edge
+      - observability
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.grafana.rule=Host(`grafana.${BASE_DOMAIN}`)
+      - traefik.http.routers.grafana.entrypoints=web
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.http.routers.grafana-secure.rule=Host(`grafana.${BASE_DOMAIN}`)
+      - traefik.http.routers.grafana-secure.entrypoints=websecure
+      - traefik.http.routers.grafana-secure.tls=true
+      - traefik.http.routers.grafana-secure.service=grafana
+
+  cadvisor:
+    image: ${CADVISOR_IMAGE}
+    container_name: infra-cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - observability
+
+  node-exporter:
+    image: ${NODE_EXPORTER_IMAGE}
+    container_name: infra-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - observability
+
+volumes:
+  grafana-data:
+  loki-data:
+  prometheus-data:
+
+networks:
+  edge:
+    external: true
+  observability:

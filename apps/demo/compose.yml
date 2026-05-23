@@ -1,0 +1,26 @@
+name: demo-app
+
+services:
+  demo:
+    build:
+      context: .
+    container_name: app-demo
+    restart: unless-stopped
+    environment:
+      APP_NAME: demo
+    networks:
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=edge
+      - traefik.http.routers.demo.rule=Host(`demo.${BASE_DOMAIN}`)
+      - traefik.http.routers.demo.entrypoints=web
+      - traefik.http.services.demo.loadbalancer.server.port=3000
+      - traefik.http.routers.demo-secure.rule=Host(`demo.${BASE_DOMAIN}`)
+      - traefik.http.routers.demo-secure.entrypoints=websecure
+      - traefik.http.routers.demo-secure.tls=true
+      - traefik.http.routers.demo-secure.service=demo
+
+networks:
+  edge:
+    external: true
