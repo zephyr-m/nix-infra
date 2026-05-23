@@ -7,9 +7,6 @@
         href: https://dozzle.127.0.0.1.sslip.io
         description: Container logs
         icon: dozzle.svg
-    - Docker:
-        description: Local container runtime
-        icon: docker.svg
 
 - Observability:
     - Grafana:

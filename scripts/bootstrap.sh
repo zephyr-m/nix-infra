@@ -43,6 +43,8 @@ else
   echo "Docker network already exists: edge"
 fi
 
+mkdir -p portal/homepage/logs data/homepage/logs
+
 ./scripts/certs.sh
 
 echo

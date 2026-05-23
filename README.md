@@ -19,8 +19,27 @@ On NixOS, add Docker to your system config first:
 
 ```nix
 {
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+    };
+  };
+
   users.users.zephyr.extraGroups = [ "docker" ];
+
+  environment.systemPackages = with pkgs; [
+    docker
+    docker-compose
+    just
+    mkcert
+    openssl
+    jq
+    yq-go
+    curl
+    git
+  ];
 }
 ```
 
@@ -45,16 +64,24 @@ nix --extra-experimental-features nix-command --extra-experimental-features flak
 just start
 ```
 
+If those tools are installed system-wide, `nix develop` is optional:
+
+```bash
+cd ~/infra
+just start
+```
+
 Open:
 
 ```text
 https://home.127.0.0.1.sslip.io
+https://homepage.127.0.0.1.sslip.io
 https://dozzle.127.0.0.1.sslip.io
 https://demo.127.0.0.1.sslip.io
 https://traefik.127.0.0.1.sslip.io
 ```
 
-The first bootstrap creates `.env`, the external Docker network `edge`, and local TLS certificates with `mkcert`.
+The first bootstrap creates `.env`, the external Docker network `edge`, local TLS certificates with `mkcert`, and writable runtime directories under `data/`.
 
 ## Observability
 
@@ -84,8 +111,13 @@ Open:
 
 ```text
 https://home.127.0.0.1.sslip.io
+https://homepage.127.0.0.1.sslip.io
 https://dozzle.127.0.0.1.sslip.io
 ```
+
+Homepage config lives in `portal/homepage` and is mounted read-only. Runtime logs are mounted separately from `data/homepage/logs` to `/app/config/logs`. The Homepage image is pinned in `.env.example` instead of using `latest`, so config expectations do not change unexpectedly after a pull.
+
+If Homepage fails with a missing config file, add that file explicitly under `portal/homepage` instead of making the whole config directory writable.
 
 ## Adding An App
 
