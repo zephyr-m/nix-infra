@@ -57,6 +57,9 @@ demo-down:
 urls:
     ./scripts/urls.sh
 
+doctor:
+    ./scripts/doctor.sh
+
 check:
     docker --version
     docker compose version

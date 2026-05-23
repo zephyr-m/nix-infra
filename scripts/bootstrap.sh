@@ -14,7 +14,25 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 if ! docker info >/dev/null 2>&1; then
-  echo "Docker daemon is not reachable. Start/enable Docker on this machine first." >&2
+  cat >&2 <<'EOF'
+Docker daemon is not reachable.
+
+This repo's Nix shell provides the Docker CLI, but the Docker daemon is an OS service.
+
+On NixOS, enable Docker in your system configuration, rebuild, then log out and back in:
+
+  virtualisation.docker.enable = true;
+  users.users.<your-user>.extraGroups = [ "docker" ];
+
+Then run:
+
+  sudo nixos-rebuild switch
+
+Quick checks after reboot/relogin:
+
+  systemctl status docker
+  docker info
+EOF
   exit 1
 fi
 

@@ -15,6 +15,30 @@ The contract:
 
 Host prerequisite: Docker daemon must be enabled on the machine. Nix provides the CLI tools for this repo, but the daemon is an OS-level service.
 
+On NixOS, add Docker to your system config first:
+
+```nix
+{
+  virtualisation.docker.enable = true;
+  users.users.zephyr.extraGroups = [ "docker" ];
+}
+```
+
+Then rebuild and log out/back in so the `docker` group is applied:
+
+```bash
+sudo nixos-rebuild switch
+```
+
+Check that the daemon works:
+
+```bash
+systemctl status docker
+docker info
+```
+
+After that, start the platform:
+
 ```bash
 cd ~/infra
 nix --extra-experimental-features nix-command --extra-experimental-features flakes develop
@@ -70,7 +94,9 @@ networks:
 
 ## Moving To Another Machine
 
-Install/enable Docker at the OS level, then:
+Install/enable Docker at the OS level first. On NixOS, use the same Docker config shown above.
+
+Then:
 
 ```bash
 git clone <this-repo> ~/infra
